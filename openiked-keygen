@@ -1,0 +1,4 @@
+#!/bin/sh
+
+openssl ecparam -genkey -name prime256v1 -noout -out "/etc/iked/private/local.key"
+openssl ec -in "$DIR/private/local.key" -pubout -out "/etc/iked/local.pub"

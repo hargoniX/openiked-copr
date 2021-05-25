@@ -1,0 +1,11 @@
+[Unit]
+Description=OpenIKED Key Generation
+ConditionFileNotEmpty=|!/etc/iked/private/local.key
+ConditionFileNotEmpty=|!/etc/iked/local.pub
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/openiked/openiked-keygen
+
+[Install]
+WantedBy=openiked-keygen.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=OpenIKED
+Documentation=
+Before=network-online.target
+After=network-online.target
+Wants=openiked-keygen.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/iked
+ExecReload=/usr/sbin/ikectl reload
+
+[Install]
+WantedBy=multi-user.target
