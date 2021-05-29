@@ -1,29 +1,29 @@
 Name:           openiked
 Version:        6.9.0
 Release:        1%{?dist}
-Summary:        Port of OpenBSD's OpenIKED to Linux
+Summary:        A free Internet Key Exchange (IKEv2) implementation
 
 License:        ISC
 URL:            https://github.com/openiked/openiked-portable
 Source0:        https://ftp.openbsd.org/pub/OpenBSD/OpenIKED/openiked-%{version}.tar.gz
-Source1:        https://ftp.openbsd.org/pub/OpenBSD/OpenIKED/openiked-%{version}.tar.gz.asc
-Source2:        openiked.service
-Source3:        sysusers.conf
-Source4:        openiked-keygen
-Source5:        openiked-keygen.service
-Source6:        openiked-keygen.target
+Source1:        openiked.service
+Source2:        sysusers.conf
+Source3:        openiked-keygen
+Source4:        openiked-keygen.service
+Source5:        openiked-keygen.target
 
-BuildArch:      x86_64 aarch64
-BuildRequires:  cmake libevent-devel openssl-devel byacc clang systemd-rpm-macros
-Requires:       libevent openssl
-
-%systemd_requires
-%{?sysusers_requires_compat}
+BuildRequires:  cmake
+BuildRequires:  libevent-devel
+BuildRequires:  openssl-devel
+BuildRequires:  byacc
+BuildRequires:  gcc
+BuildRequires:  gcc-c++
+BuildRequires:  systemd-rpm-macros
 
 %description
 OpenIKED is a free, permissively licensed Internet Key Exchange (IKEv2)
 implementation, developed as part of the OpenBSD project. It is intended to be
-a lean, secure and interoperable daemon that allows for easy setup and
+a lean, secure and inter-operable daemon that allows for easy setup and
 management of IPsec VPNs.
 
 %prep
@@ -35,21 +35,24 @@ management of IPsec VPNs.
 
 %install
 %cmake_install
-install -p -D -m644 %{SOURCE2} $RPM_BUILD_ROOT/%{_unitdir}/openiked.service
-install -p -D -m644 %{SOURCE3} %{buildroot}%{_sysusersdir}/openiked.conf
-install -p -D -m744 %{SOURCE4} $RPM_BUILD_ROOT/%{_libexecdir}/openiked/openiked-keygen
-install -m644 %{SOURCE5} $RPM_BUILD_ROOT/%{_unitdir}/openiked-keygen.service
-install -m644 %{SOURCE6} $RPM_BUILD_ROOT/%{_unitdir}/openiked-keygen.target
+install -p -D -m644 %{SOURCE1} %{buildroot}%{_unitdir}/openiked.service
+install -p -D -m644 %{SOURCE2} %{buildroot}%{_sysusersdir}/openiked.conf
+install -p -D -m755 %{SOURCE3} %{buildroot}%{_libexecdir}/openiked/openiked-keygen
+install -p -m644 %{SOURCE4} %{buildroot}%{_unitdir}/openiked-keygen.service
+install -p -m644 %{SOURCE5} %{buildroot}%{_unitdir}/openiked-keygen.target
 
 %check
 %{__cmake_builddir}/regress/dh/dhtest
 %{__cmake_builddir}/regress/parser/test_parser
 
 %pre
-%sysusers_create_compat %{SOURCE3}
+%sysusers_create_compat %{SOURCE2}
 
 %post
 %systemd_post openiked.service
+
+%preun
+%systemd_preun openiked.service
 
 %postun
 %systemd_postun_with_restart openiked.service
@@ -57,24 +60,27 @@ install -m644 %{SOURCE6} $RPM_BUILD_ROOT/%{_unitdir}/openiked-keygen.target
 %files
 %license LICENSE
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/iked.conf
-%attr(0755,root,root) %{_sbindir}/iked
-%attr(0755,root,root) %{_sbindir}/ikectl
-%attr(0644,root,root) %{_mandir}/man5/iked.conf.5.gz
-%attr(0644,root,root) %{_mandir}/man8/ikectl.8.gz
-%attr(0644,root,root) %{_mandir}/man8/iked.8.gz
-%attr(0644,root,root) %{_unitdir}/openiked.service
+%{_sbindir}/iked
+%{_sbindir}/ikectl
+%{_mandir}/man5/iked.conf.5.*
+%{_mandir}/man8/ikectl.8.*
+%{_mandir}/man8/iked.8.*
+%{_unitdir}/openiked.service
 %{_sysusersdir}/openiked.conf
-%attr(0755,root,root) %{_sysconfdir}/iked/ca
-%attr(0755,root,root) %{_sysconfdir}/iked/certs
-%attr(0755,root,root) %{_sysconfdir}/iked/crls
-%attr(0755,root,root) %{_sysconfdir}/iked/pubkeys/ipv4
-%attr(0755,root,root) %{_sysconfdir}/iked/pubkeys/ipv6
-%attr(0755,root,root) %{_sysconfdir}/iked/pubkeys/fqdn
-%attr(0755,root,root) %{_sysconfdir}/iked/pubkeys/ufqdn
+%{_sysconfdir}/iked/ca
+%{_sysconfdir}/iked/certs
+%{_sysconfdir}/iked/crls
+%{_sysconfdir}/iked/pubkeys/ipv4
+%{_sysconfdir}/iked/pubkeys/ipv6
+%{_sysconfdir}/iked/pubkeys/fqdn
+%{_sysconfdir}/iked/pubkeys/ufqdn
 %attr(0700,root,root) %{_sysconfdir}/iked/private
-%attr(0755,root,root) %{_libexecdir}/openiked/openiked-keygen
-%attr(0644,root,root) %{_unitdir}/openiked-keygen.service
-%attr(0644,root,root) %{_unitdir}/openiked-keygen.target
+%{_libexecdir}/openiked/openiked-keygen
+%{_unitdir}/openiked-keygen.service
+%{_unitdir}/openiked-keygen.target
+%dir %{_sysconfdir}/iked/
+%dir %{_libexecdir}/openiked/
+%dir %{_sysconfdir}/iked/pubkeys
 
 
 %changelog
